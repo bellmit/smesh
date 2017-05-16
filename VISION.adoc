@@ -6,12 +6,33 @@ as well as enabling IPC across the cluster members.
 Regardless of the internal complexity of Smesh, it should be easy to setup Smesh in one's application.
 i.e. no code are required for basic use cases.
 
-== Business aspects
+== Our Mantras
+
+The below mantras are rules we live/develop by. These should be always kept in mind when providing a pull request.
+
+=== "Don't scare the programmers"
+
+We do not want to scare off the users at their first use, so we try to hide the framework's internals as much as possible,
+but still enable advanced users to dig down into the rabbit hole to explore and possibly adapt the guts of the framework.
+
+In other words, basic use cases should be accessible/usable without any in-depth knowledge about Smesh and the backing technologies.
+
+=== "It just works"
+
+We do want to preserve the "it just works" effect, when someone adds Smesh to their project for the first time.
+This means that we do not want to end up with a framework that requires a complex setup procedure when being added to a project.
+
+=== "Quality over Quantity"
+
+Smesh should not shine due to the massive amount of features or supported technologies,
+but rather due to their quality and the considerations made.
+
+== Business Aspects
 
 Smesh is designed to be used for small projects, only maintaining a few services, as well as full-fledged enterprise systems,
 containing a wide variety of different services and huge clusters.
 
-== Technical aspects
+== Technical Aspects
 
 Smesh's modules utilize well-known technologies and enriches them with a generalized way to share available services and their APIs,
 either via a centralized service registry or maintaining a client-side registry.
@@ -20,12 +41,12 @@ Additionally, Smesh establishes and maintains the respective service cluster.
 It is not a goal to create a new IPC-protocol (e.g. https://github.com/google/protobuf[Protobufs]),
 but instead rely on established technologies, such as http://www.grpc.io/[gRPC] and https://hazelcast.org/[HazelCast].
 
-== Structural aspects
+== Structural Aspects
 
 Technologies backing Smesh's functionality should be interchangeable by switching one Smesh module with another. e.g. smesh-hazelcast with smesh-grpc.
 As these technologies are mostly incompatible with each other, it is required that Smesh provides custom interfaces to provide the necessary interchangeability.
 
-== Operational aspects
+== Operational Aspects
 
 Smesh's features should be monitorable and configurable at runtime, although the later is no strict requirement,
 but rather a recommendation.
