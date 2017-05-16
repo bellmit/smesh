@@ -1,6 +1,7 @@
 # Smesh
 
 image:https://travis-ci.org/r2dg/smesh.svg?branch=master["Build Status", link="https://travis-ci.org/r2dg/smesh"]
+image:https://codecov.io/gh/r2dg/smesh/branch/master/graph/badge.svg["codecov", link="https://codecov.io/gh/r2dg/smesh"]
 
 ## Vision
 
