@@ -1,6 +1,8 @@
 = Vision
 
-Smesh's vision is to provide a generalized way for IPC between Java-based (Micro-)services.
+Smesh's vision is to provide a generalized way to establish and maintain a cluster with multiple Java-based (Micro-)services
+as well as enabling IPC across the cluster members.
+
 Regardless of the internal complexity of Smesh, it should be easy to setup Smesh in one's application.
 i.e. no code are required for basic use cases.
 
@@ -27,6 +29,7 @@ As these technologies are mostly incompatible with each other, it is required th
 
 Smesh's features should be monitorable and configurable at runtime, although the later is no strict requirement,
 but rather a recommendation.
+In addition, Smesh should provide a way to manage all connected cluster-members via a dedicated control-service offering a respective interface.
 
 == Disclaimer
 
