@@ -77,15 +77,12 @@ public abstract class AbstractCluster implements Cluster {
                 throw new IllegalStateException("Unable to start smesh cluster invalid state: " + getState());
             }
 
-            state = ClusterState.STARTING;
-
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
+            LOGGER.info("[{}]: Joining smesh cluster...", localMember);
 
-            LOGGER.info("Joining smesh cluster...");
-
+            state = ClusterState.STARTING;
             triggerStateChanged(new ClusterLifecycleEvent(this, state));
-
 
             doStart();
 
@@ -98,7 +95,7 @@ public abstract class AbstractCluster implements Cluster {
             triggerEvent(new ClusterStartedEvent(this, getRemoteMembersDirect(), getLocalMember(), startTime));
 
             stopWatch.stop();
-            LOGGER.info("Joining smesh cluster took: {}", stopWatch);
+            LOGGER.info("[{}]: Joining smesh cluster took: {}", localMember, stopWatch);
 
             return null;
         });
@@ -120,7 +117,9 @@ public abstract class AbstractCluster implements Cluster {
 
             if (isState(ClusterState.STARTED, ClusterState.STARTING)) {
                 try {
-                    LOGGER.info("Stopping smesh cluster [{}]", getLocalMember());
+                    StopWatch stopWatch = new StopWatch();
+                    stopWatch.start();
+                    LOGGER.info("[{}]: Stopping smesh cluster...", localMember);
 
                     state = ClusterState.STOPPING;
                     triggerStateChanged(new ClusterLifecycleEvent(this, state));
@@ -133,6 +132,9 @@ public abstract class AbstractCluster implements Cluster {
                     startTime = null;
                     state = ClusterState.STOPPED;
                     triggerStateChanged(new ClusterLifecycleEvent(this, state));
+
+                    LOGGER.info("[{}]: Stopping smesh cluster took: {}", localMember, stopWatch);
+
                 } catch (Exception e) {
                     String msg = String.format("Exception while stopping smesh cluster: %s", e.getMessage());
                     LOGGER.error(msg, e);

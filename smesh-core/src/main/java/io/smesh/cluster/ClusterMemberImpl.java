@@ -59,6 +59,6 @@ public class ClusterMemberImpl implements ClusterMember {
 
     @Override
     public String toString() {
-        return getName() + "-" + getUuid();
+        return getName();
     }
 }

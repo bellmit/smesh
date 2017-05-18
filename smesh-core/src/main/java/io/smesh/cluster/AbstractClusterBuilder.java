@@ -57,7 +57,7 @@ public abstract class AbstractClusterBuilder<C extends Cluster, B extends Abstra
         if (localMember == null) {
             String localMemberName = config.getLocalMemberName();
             if (localMemberName == null) {
-                localMemberName = RandomStringUtils.randomAlphanumeric(10);
+                localMemberName = RandomStringUtils.randomAlphabetic(10);
             }
             localMember = new ClusterMemberImpl(localMemberName, UUID.randomUUID().toString(), true);
         }
