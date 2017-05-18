@@ -1,5 +1,8 @@
-package io.smesh.cluster;
+package io.smesh.cluster.lifecycle;
 
+import io.smesh.cluster.Cluster;
+import io.smesh.cluster.ClusterState;
+import io.smesh.cluster.MemoryClusterBuilder;
 import io.smesh.cluster.lifecycle.ClusterLifecycleEventExpectation;
 import org.junit.Test;
 
