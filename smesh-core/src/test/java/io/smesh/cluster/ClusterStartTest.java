@@ -1,9 +1,8 @@
 package io.smesh.cluster;
 
-import io.smesh.lifecycle.ClusterLifecycleEventExpectation;
+import io.smesh.cluster.lifecycle.ClusterLifecycleEventExpectation;
 import org.junit.Test;
 
-import static io.smesh.cluster.ClusterTestUtils.testCluster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -11,7 +10,8 @@ public class ClusterStartTest {
 
     @Test
     public void testStartEvents() throws InterruptedException {
-        Cluster cluster = testCluster("member");
+        Cluster cluster = new MemoryClusterBuilder().build();
+
         ClusterLifecycleEventExpectation expectation = new ClusterLifecycleEventExpectation(2);
         cluster.registerLifecycleListener(expectation);
         cluster.start();

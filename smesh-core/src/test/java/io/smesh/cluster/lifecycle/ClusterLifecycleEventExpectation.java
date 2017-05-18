@@ -1,7 +1,5 @@
-package io.smesh.lifecycle;
+package io.smesh.cluster.lifecycle;
 
-import io.smesh.cluster.lifecycle.ClusterLifecycleEvent;
-import io.smesh.cluster.lifecycle.ClusterLifecycleListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +31,7 @@ public class ClusterLifecycleEventExpectation implements ClusterLifecycleListene
     @Override
     public void stateChanged(ClusterLifecycleEvent event) {
         LOGGER.info("Received lifecycle event: {}", event.getState());
-        event.getCluster().getTaskService().executingOnThread(CLUSTER);
+        event.getCluster().getTaskService().verifyExecutingOnThread(CLUSTER);
         events.add(event);
         invocations += 1;
         latch.countDown();

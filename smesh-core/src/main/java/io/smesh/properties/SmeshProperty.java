@@ -21,8 +21,24 @@ public class SmeshProperty {
         this(name, String.valueOf(defaultValue));
     }
 
+    public SmeshProperty(String name, int defaultValue, TimeUnit timeUnit) {
+        this(name, String.valueOf(defaultValue), timeUnit);
+    }
+
+    public SmeshProperty(String name, float defaultValue) {
+        this(name, String.valueOf(defaultValue));
+    }
+
+    public SmeshProperty(String name, float defaultValue, TimeUnit timeUnit) {
+        this(name, String.valueOf(defaultValue), timeUnit);
+    }
+
     public SmeshProperty(String name, long defaultValue) {
         this(name, String.valueOf(defaultValue));
+    }
+
+    public SmeshProperty(String name, long defaultValue, TimeUnit timeUnit) {
+        this(name, String.valueOf(defaultValue), timeUnit);
     }
 
     public SmeshProperty(String name, String defaultValue) {
@@ -30,7 +46,7 @@ public class SmeshProperty {
     }
 
     protected SmeshProperty(String name, String defaultValue, TimeUnit timeUnit) {
-        this.name = Objects.requireNonNull(name);
+        this.name = Objects.requireNonNull(name, "name must not be null");
         this.defaultValue = defaultValue;
         this.timeUnit = timeUnit;
     }
@@ -45,9 +61,13 @@ public class SmeshProperty {
 
     public TimeUnit getTimeUnit() {
         if (timeUnit == null) {
-            throw new IllegalArgumentException(String.format("property %s has not TimeUnit defined", this));
+            throw new IllegalArgumentException(String.format("property %s has no TimeUnit defined", this));
         }
         return timeUnit;
+    }
+
+    public void setSystemProperty(String value) {
+        System.setProperty(name, value);
     }
 
     public String getSystemProperty() {

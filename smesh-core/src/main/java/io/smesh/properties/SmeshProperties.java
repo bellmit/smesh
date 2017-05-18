@@ -53,15 +53,30 @@ public class SmeshProperties {
         return Boolean.valueOf(getRequiredString(property));
     }
 
-    public long getLong(SmeshProperty property) {
-        return Long.valueOf(getString(property));
+    public Long getLong(SmeshProperty property) {
+        String value = getString(property);
+        return value == null ? null : Long.valueOf(value);
     }
 
-    public int getInt(SmeshProperty property) {
-        return Integer.valueOf(getString(property));
+    public long getRequiredLong(SmeshProperty property) {
+        return Long.valueOf(getRequiredString(property));
     }
 
-    public float getFloat(SmeshProperty property) {
-        return Float.valueOf(getString(property));
+    public Integer getInteger(SmeshProperty property) {
+        String value = getString(property);
+        return value == null ? null : Integer.valueOf(value);
+    }
+
+    public int getRequiredInteger(SmeshProperty property) {
+        return Integer.valueOf(getRequiredString(property));
+    }
+
+    public Float getFloat(SmeshProperty property) {
+        String value = getString(property);
+        return value == null ? null : Float.valueOf(value);
+    }
+
+    public float getRequiredFloat(SmeshProperty property) {
+        return Float.valueOf(getRequiredString(property));
     }
 }
