@@ -19,6 +19,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.smesh.cluster.task.TaskService.TaskThread.CLUSTER;
+
 public abstract class AbstractCluster implements Cluster {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCluster.class);
@@ -34,14 +36,15 @@ public abstract class AbstractCluster implements Cluster {
     private final TaskService taskService;
 
     private final List<ClusterMember> members = new CopyOnWriteArrayList<>();
-    private ClusterMember localMember;
+    private final ClusterMember localMember;
 
     private final AtomicBoolean memberInfoMessageScheduled = new AtomicBoolean(false);
 
 
-    public AbstractCluster(ClusterConfig config, TaskService taskService) {
-        this.config = Objects.requireNonNull(config);
-        this.taskService = Objects.requireNonNull(taskService);
+    public AbstractCluster(ClusterConfig config, ClusterMember localMember, TaskService taskService) {
+        this.localMember = verifyLocalMember(localMember);
+        this.config = Objects.requireNonNull(config, "config is null");
+        this.taskService = Objects.requireNonNull(taskService, "taskService is null");
 
         taskService.setCluster(this);
 
@@ -81,14 +84,14 @@ public abstract class AbstractCluster implements Cluster {
 
             LOGGER.info("Joining smesh cluster...");
 
-            triggerStateChanged(new ClusterLifecycleEvent(state));
+            triggerStateChanged(new ClusterLifecycleEvent(this, state));
 
 
             doStart();
 
             startTime = Instant.now();
             state = ClusterState.STARTED;
-            triggerStateChanged(new ClusterLifecycleEvent(state));
+            triggerStateChanged(new ClusterLifecycleEvent(this, state));
 
             scheduleLogMemberInfo();
 
@@ -99,11 +102,6 @@ public abstract class AbstractCluster implements Cluster {
 
             return null;
         });
-    }
-
-    protected void setLocalMember(ClusterMember member) {
-        verifyLocalMember(member);
-        this.localMember = member;
     }
 
     protected abstract void doStart();
@@ -125,7 +123,7 @@ public abstract class AbstractCluster implements Cluster {
                     LOGGER.info("Stopping smesh cluster [{}]", getLocalMember());
 
                     state = ClusterState.STOPPING;
-                    triggerStateChanged(new ClusterLifecycleEvent(state));
+                    triggerStateChanged(new ClusterLifecycleEvent(this, state));
 
                     taskService.stop();
 
@@ -134,7 +132,7 @@ public abstract class AbstractCluster implements Cluster {
                     members.clear();
                     startTime = null;
                     state = ClusterState.STOPPED;
-                    triggerStateChanged(new ClusterLifecycleEvent(state));
+                    triggerStateChanged(new ClusterLifecycleEvent(this, state));
                 } catch (Exception e) {
                     String msg = String.format("Exception while stopping smesh cluster: %s", e.getMessage());
                     LOGGER.error(msg, e);
@@ -241,7 +239,7 @@ public abstract class AbstractCluster implements Cluster {
     }
 
     private void doAddRemoteMember(ClusterMember remoteMember) {
-        verifyExecutingOnClusterThread();
+        taskService.verifyExecutingOnThread(CLUSTER);
         verifyRemoteMember(remoteMember);
 
         if (!isKnownMember(remoteMember)) {
@@ -267,7 +265,7 @@ public abstract class AbstractCluster implements Cluster {
     }
 
     private void doRemoveRemoteMember(ClusterMember remoteMember) {
-        verifyExecutingOnClusterThread();
+        taskService.verifyExecutingOnThread(CLUSTER);
         verifyRemoteMember(remoteMember);
 
         if (isKnownMember(remoteMember)) {
@@ -279,7 +277,8 @@ public abstract class AbstractCluster implements Cluster {
         }
     }
 
-    protected TaskService getTaskService() {
+    @Override
+    public TaskService getTaskService() {
         return taskService;
     }
 
@@ -287,26 +286,20 @@ public abstract class AbstractCluster implements Cluster {
         return members.contains(member);
     }
 
-    private void verifyLocalMember(ClusterMember member) {
-        Objects.requireNonNull(member);
+    private static ClusterMember verifyLocalMember(ClusterMember member) {
+        Objects.requireNonNull(member, "member is null");
         if (!member.isLocal()) {
             throw new IllegalArgumentException("Remote member not allowed");
         }
+        return member;
     }
 
     private void verifyRemoteMember(ClusterMember member) {
-        Objects.requireNonNull(member);
+        Objects.requireNonNull(member, "member is null");
         if (member.isLocal()) {
             throw new IllegalArgumentException("Local member not allowed");
         }
     }
-
-    private void verifyExecutingOnClusterThread() {
-        if (!taskService.executingOnThread(TaskService.TaskThread.CLUSTER)) {
-            throw new UnsupportedOperationException("Execution only allowed on the [" + TaskService.TaskThread.CLUSTER.toString().toLowerCase() + "] cluster thread");
-        }
-    }
-
 
 
 }

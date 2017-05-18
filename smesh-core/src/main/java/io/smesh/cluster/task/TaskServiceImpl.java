@@ -88,6 +88,13 @@ public class TaskServiceImpl implements TaskService, ClusterAware {
     }
 
     @Override
+    public void verifyExecutingOnThread(TaskThread thread) {
+        if (!executingOnThread(thread)) {
+            throw new IllegalStateException("Execution only allowed on the [" + thread + "] cluster thread, but executing on " + Thread.currentThread().getName());
+        }
+    }
+
+    @Override
     public <R> TaskCall<R> execute(ClusterTask<R> task) {
         ClusterThreadRunner<R> runner = newRunner(task);
         clusterThreadPool.execute(runner);

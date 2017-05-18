@@ -2,6 +2,7 @@ package io.smesh.cluster;
 
 import io.smesh.cluster.event.ClusterEventListener;
 import io.smesh.cluster.lifecycle.ClusterLifecycleListener;
+import io.smesh.cluster.task.TaskService;
 
 import java.util.List;
 
@@ -29,9 +30,9 @@ public interface Cluster {
 
     ClusterMember getLocalMember();
 
-
     void removeRemoteMember(ClusterMember remoteMember);
 
     void addRemoteMember(ClusterMember remoteMember);
 
+    TaskService getTaskService();
 }

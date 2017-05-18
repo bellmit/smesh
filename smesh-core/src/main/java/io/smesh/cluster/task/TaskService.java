@@ -30,6 +30,8 @@ public interface TaskService extends ClusterAware {
 
     boolean executingOnThread(TaskThread thread);
 
+    void verifyExecutingOnThread(TaskThread thread);
+
     void scheduleWithFixedDelay(ScheduledTask task, long initialDelay, long delay, TimeUnit timeUnit);
 
     void schedule(ScheduledTask task, long delay, TimeUnit timeUnit);
