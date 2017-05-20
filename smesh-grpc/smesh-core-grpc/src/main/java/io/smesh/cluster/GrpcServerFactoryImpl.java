@@ -1,8 +1,7 @@
-package cluster;
+package io.smesh.cluster;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import io.smesh.cluster.ClusterConfig;
 
 public class GrpcServerFactoryImpl implements GrpcServerFactory {
 

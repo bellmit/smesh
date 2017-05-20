@@ -1,9 +1,6 @@
-package cluster;
+package io.smesh.cluster;
 
 import io.grpc.Server;
-import io.smesh.cluster.AbstractCluster;
-import io.smesh.cluster.ClusterConfig;
-import io.smesh.cluster.ClusterMember;
 
 public class GrpcCluster extends AbstractCluster {
 

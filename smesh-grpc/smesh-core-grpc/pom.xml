@@ -23,5 +23,9 @@
             <groupId>io.grpc</groupId>
             <artifactId>grpc-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-grpclb</artifactId>
+        </dependency>
     </dependencies>
 </project>

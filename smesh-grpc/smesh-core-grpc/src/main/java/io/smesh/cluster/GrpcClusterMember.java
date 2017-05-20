@@ -1,6 +1,4 @@
-package cluster;
-
-import io.smesh.cluster.ClusterMemberImpl;
+package io.smesh.cluster;
 
 public class GrpcClusterMember extends ClusterMemberImpl {
 
