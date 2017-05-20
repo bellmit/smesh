@@ -1,6 +1,5 @@
 package io.smesh.properties;
 
-import com.sun.javafx.runtime.SystemProperties;
 import org.junit.Test;
 
 import java.util.Collections;
