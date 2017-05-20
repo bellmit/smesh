@@ -1,0 +1,14 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date %-5p [%t] [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="io.smesh" level="DEBUG"/>
+
+    <root level="ERROR">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

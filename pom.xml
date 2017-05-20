@@ -41,6 +41,7 @@
     <modules>
         <module>smesh-core</module>
         <module>smesh-hazelcast</module>
+        <module>smesh-grpc</module>
     </modules>
 
     <developers>
@@ -55,7 +56,7 @@
         <developer>
             <id>dguggi</id>
             <name>Daniel Guggi</name>
-            <email>TODO</email>
+            <email>daniel.guggi@gmail.com</email>
             <roles>
                 <role>Project lead</role>
             </roles>
