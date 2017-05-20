@@ -42,6 +42,7 @@
         <module>smesh-core</module>
         <module>smesh-hazelcast</module>
         <module>smesh-grpc</module>
+        <module>smesh-core-test</module>
     </modules>
 
     <developers>

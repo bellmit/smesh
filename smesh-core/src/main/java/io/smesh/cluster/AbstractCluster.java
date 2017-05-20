@@ -122,6 +122,7 @@ public abstract class AbstractCluster implements Cluster {
                     state = ClusterState.STOPPED;
                     triggerStateChanged(new ClusterLifecycleEvent(this, state));
 
+                    stopWatch.stop();
                     LOGGER.info("Stopping smesh cluster took: {}", stopWatch);
 
                 } catch (Exception e) {
@@ -267,8 +268,6 @@ public abstract class AbstractCluster implements Cluster {
         }
         return member;
     }
-
-
 
 
 }

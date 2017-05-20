@@ -7,24 +7,24 @@ import java.util.Objects;
 
 public class ClusterMemberImpl implements ClusterMember {
     private final String name;
-    private final String uuid;
+    private final String id;
     private final Role role;
     private final boolean local;
 
 
-    public ClusterMemberImpl(String name, String uuid, Role role, boolean local) {
+    public ClusterMemberImpl(String name, String id, Role role, boolean local) {
         this.name = Objects.requireNonNull(name, "name is required");
-        this.uuid = Objects.requireNonNull(uuid, "uuid is required");
-        this.local = Objects.requireNonNull(local, "local is required");;
-        this.role = Objects.requireNonNull(role, "role is required");;
+        this.id = Objects.requireNonNull(id, "id is required");
+        this.local = Objects.requireNonNull(local, "local is required");
+        this.role = Objects.requireNonNull(role, "role is required");
     }
 
     public String getName() {
         return name;
     }
 
-    public String getUuid() {
-        return uuid;
+    public String getId() {
+        return id;
     }
 
     public boolean isLocal() {
@@ -52,7 +52,7 @@ public class ClusterMemberImpl implements ClusterMember {
         ClusterMember other = (ClusterMember) obj;
         EqualsBuilder builder = new EqualsBuilder() //
                 .append(getName(), other.getName());
-        builder.append(getUuid(), other.getUuid());
+        builder.append(getId(), other.getId());
         return builder.isEquals();
     }
 
@@ -62,7 +62,7 @@ public class ClusterMemberImpl implements ClusterMember {
             return super.hashCode();
         }
 
-        HashCodeBuilder builder = new HashCodeBuilder().append(getName()).append(getUuid());
+        HashCodeBuilder builder = new HashCodeBuilder().append(getName()).append(getId());
         return builder.toHashCode();
     }
 

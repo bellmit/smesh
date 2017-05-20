@@ -6,12 +6,12 @@ import static io.smesh.cluster.ClusterMember.Role.SERVER;
 public interface ClusterMember {
     enum Role {
         CLIENT,
-        SERVER;
+        SERVER
     }
 
     String getName();
 
-    String getUuid();
+    String getId();
 
     boolean isLocal();
 

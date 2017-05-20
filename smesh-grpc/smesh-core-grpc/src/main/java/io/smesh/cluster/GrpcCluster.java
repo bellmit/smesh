@@ -2,6 +2,10 @@ package io.smesh.cluster;
 
 import io.grpc.Server;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.UUID;
+
 public class GrpcCluster extends AbstractCluster {
 
     // Grpc server may be set via constructor directly, in which case we don't touch...
@@ -26,9 +30,21 @@ public class GrpcCluster extends AbstractCluster {
     protected ClusterMember doStart() {
         if (!grpcServerExternallyManaged) {
             this.grpcServer = grpcServerFactory.create(getConfig());
+            try {
+                grpcServer.start();
+            } catch (IOException e) {
+                // TODO smesh exception
+                throw new UncheckedIOException(e);
+            }
         }
-        // TODO:
-        return null;
+        return newLocalClusterMember(getConfig());
+    }
+
+    protected ClusterMember newLocalClusterMember(ClusterConfig config) {
+        return new GrpcClusterMember(config.getLocalMemberName(),
+                UUID.randomUUID().toString(),
+                config.getLocalMemberRole(),
+                true);
     }
 
     @Override

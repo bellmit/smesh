@@ -21,11 +21,17 @@
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
-            <artifactId>grpc-core</artifactId>
+            <artifactId>grpc-netty</artifactId>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-grpclb</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.smesh</groupId>
+            <artifactId>smesh-core-test</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

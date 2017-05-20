@@ -10,7 +10,7 @@ public class SmeshProperty {
     private final TimeUnit timeUnit;
 
     public SmeshProperty(String name) {
-        this(name, (String) null);
+        this(name, null);
     }
 
     public SmeshProperty(String name, boolean defaultValue) {

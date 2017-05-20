@@ -3,37 +3,38 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <artifactId>smesh-parent</artifactId>
         <groupId>io.smesh</groupId>
-        <artifactId>smesh-hazelcast-parent</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>smesh-core-hazelcast</artifactId>
-    <name>Smesh Core Hazelcast</name>
-    <description>Smesh Core Hazelcast</description>
+    <artifactId>smesh-core-test</artifactId>
+    <name>Smesh Core Test</name>
+    <description>Smesh Core Test</description>
 
     <dependencies>
         <dependency>
             <groupId>io.smesh</groupId>
             <artifactId>smesh-core</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast</artifactId>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast-client</artifactId>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>compile</scope>
         </dependency>
-
         <dependency>
-            <groupId>io.smesh</groupId>
-            <artifactId>smesh-core-test</artifactId>
-            <version>${project.version}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
-
 </project>

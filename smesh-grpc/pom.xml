@@ -27,7 +27,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.grpc</groupId>
-                <artifactId>grpc-core</artifactId>
+                <artifactId>grpc-netty</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
             <dependency>
