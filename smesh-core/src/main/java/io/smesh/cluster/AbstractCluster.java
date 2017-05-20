@@ -6,6 +6,7 @@ import io.smesh.cluster.event.RemoteClusterMemberAddedEvent;
 import io.smesh.cluster.lifecycle.ClusterLifecycleEvent;
 import io.smesh.cluster.lifecycle.ClusterLifecycleListener;
 import io.smesh.cluster.task.TaskService;
+import io.smesh.cluster.task.TaskServiceImpl;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ public abstract class AbstractCluster implements Cluster {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCluster.class);
 
+    private final ClusterConfig config;
     private volatile ClusterState state = ClusterState.STOPPED;
     private volatile Instant startTime;
 
@@ -32,29 +34,22 @@ public abstract class AbstractCluster implements Cluster {
     private final List<ClusterEventListener> eventListeners = new CopyOnWriteArrayList<>();
     private final List<ClusterMembershipListener> membershipListeners = new CopyOnWriteArrayList<>();
 
-    private final ClusterConfig config;
     private final TaskService taskService;
 
     private final List<ClusterMember> members = new CopyOnWriteArrayList<>();
-    private final ClusterMember localMember;
+    private ClusterMember localMember;
 
     private final AtomicBoolean memberInfoMessageScheduled = new AtomicBoolean(false);
 
 
-    public AbstractCluster(ClusterConfig config, ClusterMember localMember, TaskService taskService) {
-        this.localMember = verifyLocalMember(localMember);
+    public AbstractCluster(ClusterConfig config) {
         this.config = Objects.requireNonNull(config, "config is null");
-        this.taskService = Objects.requireNonNull(taskService, "taskService is null");
 
-        taskService.setCluster(this);
+        this.taskService = new TaskServiceImpl(this);
 
-        lifecycleListeners.add(0, event -> {
-            if (event.getState() == ClusterState.STARTING) {
-                doStart();
-            } else if (event.getState() == ClusterState.STOPPING) {
-                doStop();
-            }
-        });
+        if (config.isAutoStartup()) {
+            this.start();
+        }
     }
 
     @Override
@@ -65,13 +60,7 @@ public abstract class AbstractCluster implements Cluster {
 
     @Override
     public void start() {
-        if (!config.isClusterEnabled()) {
-            LOGGER.warn("Unable to start smesh cluster because it is disabled");
-            return;
-        }
-
         taskService.start();
-
         taskService.executeAwait(cluster -> {
             if (!isState(ClusterState.STOPPED)) {
                 throw new IllegalStateException("Unable to start smesh cluster invalid state: " + getState());
@@ -79,12 +68,12 @@ public abstract class AbstractCluster implements Cluster {
 
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
-            LOGGER.info("[{}]: Joining smesh cluster...", localMember);
+            LOGGER.info("Joining smesh cluster...");
 
             state = ClusterState.STARTING;
             triggerStateChanged(new ClusterLifecycleEvent(this, state));
 
-            doStart();
+            this.localMember = verifyLocalMember(doStart());
 
             startTime = Instant.now();
             state = ClusterState.STARTED;
@@ -101,7 +90,7 @@ public abstract class AbstractCluster implements Cluster {
         });
     }
 
-    protected abstract void doStart();
+    protected abstract ClusterMember doStart();
 
     @Override
     public void stop() {
@@ -111,7 +100,7 @@ public abstract class AbstractCluster implements Cluster {
 
         taskService.executeAwait(task -> {
             if (!isState(ClusterState.STARTED)) {
-                String msg = String.format("[%s]: Trying to stop smesh cluster with invalid state [%s]", getLocalMember(), state);
+                String msg = String.format("Trying to stop smesh cluster with invalid state [%s]", state);
                 LOGGER.warn(msg);
             }
 
@@ -129,11 +118,12 @@ public abstract class AbstractCluster implements Cluster {
                     doStop();
 
                     members.clear();
+                    localMember = null;
                     startTime = null;
                     state = ClusterState.STOPPED;
                     triggerStateChanged(new ClusterLifecycleEvent(this, state));
 
-                    LOGGER.info("[{}]: Stopping smesh cluster took: {}", localMember, stopWatch);
+                    LOGGER.info("Stopping smesh cluster took: {}", stopWatch);
 
                 } catch (Exception e) {
                     String msg = String.format("Exception while stopping smesh cluster: %s", e.getMessage());
@@ -288,6 +278,7 @@ public abstract class AbstractCluster implements Cluster {
         return members.contains(member);
     }
 
+
     private static ClusterMember verifyLocalMember(ClusterMember member) {
         Objects.requireNonNull(member, "member is null");
         if (!member.isLocal()) {
@@ -296,7 +287,7 @@ public abstract class AbstractCluster implements Cluster {
         return member;
     }
 
-    private void verifyRemoteMember(ClusterMember member) {
+    private static void verifyRemoteMember(ClusterMember member) {
         Objects.requireNonNull(member, "member is null");
         if (member.isLocal()) {
             throw new IllegalArgumentException("Local member not allowed");

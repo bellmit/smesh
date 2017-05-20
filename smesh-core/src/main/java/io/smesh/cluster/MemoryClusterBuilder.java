@@ -4,6 +4,6 @@ public class MemoryClusterBuilder extends AbstractClusterBuilder<MemoryCluster, 
 
     @Override
     protected MemoryCluster doBuild() {
-        return new MemoryCluster(config, localMember, taskService);
+        return new MemoryCluster(config);
     }
 }

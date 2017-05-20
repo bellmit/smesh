@@ -1,6 +1,8 @@
 package io.smesh.properties;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 public class SmeshProperties {
 
@@ -16,10 +18,6 @@ public class SmeshProperties {
         if (nullableProperties != null) {
             properties.putAll(nullableProperties);
         }
-    }
-
-    public Set<String> keySet() {
-        return Collections.unmodifiableSet(properties.keySet());
     }
 
     public String getString(SmeshProperty property) {

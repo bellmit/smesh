@@ -1,54 +1,63 @@
 package io.smesh.cluster.task;
 
 import io.smesh.cluster.Cluster;
-import io.smesh.cluster.ClusterAware;
 import io.smesh.cluster.util.NamedThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.*;
 
-public class TaskServiceImpl implements TaskService, ClusterAware {
+public class TaskServiceImpl implements TaskService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskServiceImpl.class);
 
     private static final ThreadLocal<TaskService.TaskThread> TL = new ThreadLocal<>();
 
-    private Cluster cluster;
+    private final Cluster cluster;
     private ThreadPoolExecutor clusterThreadPool;
     private ThreadPoolExecutor eventThreadPool;
     private ScheduledThreadPoolExecutor schedulerThreadPool;
+    private volatile boolean started = false;
 
+    public TaskServiceImpl(Cluster cluster) {
+        this.cluster = cluster;
+    }
 
     @Override
     public void start() {
-        clusterThreadPool = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
-                new NamedThreadFactory("smesh-cluster-"));
+        if (!started) {
+            clusterThreadPool = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
+                    new NamedThreadFactory("smesh-cluster-"));
 
-        eventThreadPool = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
-                new NamedThreadFactory("smesh-notifier-"));
+            eventThreadPool = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
+                    new NamedThreadFactory("smesh-notifier-"));
 
-        schedulerThreadPool = new ScheduledThreadPoolExecutor(2, new NamedThreadFactory("smesh-scheduler-"));
-        schedulerThreadPool.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
-        schedulerThreadPool.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-        schedulerThreadPool.setRemoveOnCancelPolicy(true);
+            schedulerThreadPool = new ScheduledThreadPoolExecutor(2, new NamedThreadFactory("smesh-scheduler-"));
+            schedulerThreadPool.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+            schedulerThreadPool.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+            schedulerThreadPool.setRemoveOnCancelPolicy(true);
+            started = true;
+        }
     }
 
     @Override
     public void stop() {
-        try {
-            doShutdown(schedulerThreadPool);
-            doShutdown(clusterThreadPool);
-            doShutdown(eventThreadPool);
+        if (started) {
+            try {
+                doShutdown(schedulerThreadPool);
+                doShutdown(clusterThreadPool);
+                doShutdown(eventThreadPool);
 
-            doAwaitTermination(schedulerThreadPool, "scheduler");
-            doAwaitTermination(clusterThreadPool, "executor");
-            doAwaitTermination(eventThreadPool, "notifier");
+                doAwaitTermination(schedulerThreadPool, "scheduler");
+                doAwaitTermination(clusterThreadPool, "executor");
+                doAwaitTermination(eventThreadPool, "notifier");
 
-            schedulerThreadPool = null;
-            clusterThreadPool = null;
-            eventThreadPool = null;
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+                schedulerThreadPool = null;
+                clusterThreadPool = null;
+                eventThreadPool = null;
+                started = false;
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -124,12 +133,6 @@ public class TaskServiceImpl implements TaskService, ClusterAware {
     public void scheduleWithFixedDelay(ScheduledTask task, long initialDelay, long delay, TimeUnit timeUnit) {
         schedulerThreadPool.scheduleWithFixedDelay(newRunner(task), initialDelay, delay, timeUnit);
     }
-
-    @Override
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
-    }
-
 
     private SchedulerThreadRunner newRunner(ScheduledTask task) {
         return new SchedulerThreadRunner(cluster, task);

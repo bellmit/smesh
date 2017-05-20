@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  *     <li>SCHEDULER: This pool uses two threads and is used for scheduling various tasks.</li>
  * </ul>
  */
-public interface TaskService extends ClusterAware {
+public interface TaskService {
 
     enum TaskThread {
         CLUSTER,

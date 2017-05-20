@@ -1,10 +1,27 @@
 package io.smesh.cluster;
 
-public interface ClusterMember {
+import static io.smesh.cluster.ClusterMember.Role.CLIENT;
+import static io.smesh.cluster.ClusterMember.Role.SERVER;
 
-    String getUuid();
+public interface ClusterMember {
+    enum Role {
+        CLIENT,
+        SERVER;
+    }
 
     String getName();
 
+    String getUuid();
+
     boolean isLocal();
+
+    Role getRole();
+
+    default boolean isClient(Role role) {
+        return getRole() == CLIENT;
+    }
+
+    default boolean isServer(Role role) {
+        return getRole() == SERVER;
+    }
 }

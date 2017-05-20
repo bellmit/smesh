@@ -15,9 +15,13 @@ public class ClusterConfigBuilder {
         return this;
     }
 
-    public ClusterConfigBuilder withLocalMemberName(String localMemberName) {
-        this.properties.put(CLUSTER_LOCAL_MEMBER_NAME.getName(), localMemberName);
+    public ClusterConfigBuilder withProperty(String key, String value) {
+        this.properties.put(key, value);
         return this;
+    }
+
+    public ClusterConfigBuilder withLocalMemberName(String localMemberName) {
+        return withProperty(CLUSTER_LOCAL_MEMBER_NAME.getName(), localMemberName);
     }
 
     public ClusterConfig build() {

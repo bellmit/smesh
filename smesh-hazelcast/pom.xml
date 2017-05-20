@@ -18,5 +18,22 @@
         <module>smesh-core-hazelcast</module>
     </modules>
 
+    <properties>
+        <hazelcast.version>3.8.1</hazelcast.version>
+    </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.hazelcast</groupId>
+                <artifactId>hazelcast</artifactId>
+                <version>${hazelcast.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hazelcast</groupId>
+                <artifactId>hazelcast-client</artifactId>
+                <version>${hazelcast.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

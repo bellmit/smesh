@@ -1,17 +1,21 @@
 package io.smesh.cluster;
 
 
-import io.smesh.cluster.task.TaskService;
+import org.apache.commons.lang3.RandomStringUtils;
+
+import java.util.Optional;
+import java.util.UUID;
 
 public class MemoryCluster extends AbstractCluster {
 
-    public MemoryCluster(ClusterConfig config, ClusterMember localMember, TaskService taskService) {
-        super(config, localMember, taskService);
+    public MemoryCluster(ClusterConfig config) {
+        super(config);
     }
 
     @Override
-    protected void doStart() {
-
+    protected ClusterMember doStart() {
+        final String name =  Optional.ofNullable(getConfig().getLocalMemberName()).orElse(RandomStringUtils.randomAlphabetic(10));
+        return new ClusterMemberImpl(name, UUID.randomUUID().toString(), getConfig().getLocalMemberRole(), true);
     }
 
     @Override
