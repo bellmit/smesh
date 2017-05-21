@@ -6,7 +6,7 @@ import io.smesh.cluster.task.TaskService;
 
 import java.util.List;
 
-public interface Cluster {
+public interface Cluster<C extends ClusterConfig, M extends ClusterMember> {
 
     void start();
 
@@ -14,25 +14,25 @@ public interface Cluster {
 
     ClusterState getState();
 
-    ClusterConfig getConfig();
+    C getConfig();
 
     boolean isState(ClusterState... state);
 
-    void registerLifecycleListener(ClusterLifecycleListener listener);
+    void registerLifecycleListener(ClusterLifecycleListener<C,M> listener);
 
-    void unregisterLifecycleListener(ClusterLifecycleListener listener);
+    void unregisterLifecycleListener(ClusterLifecycleListener<C,M> listener);
 
-    void registerEventListener(ClusterEventListener eventListener);
+    void registerEventListener(ClusterEventListener<C,M> eventListener);
 
-    void unregisterEventListener(ClusterEventListener eventListener);
+    void unregisterEventListener(ClusterEventListener<C,M> eventListener);
 
-    List<ClusterMember> getRemoteMembers();
+    List<M> getRemoteMembers();
 
-    ClusterMember getLocalMember();
+    M getLocalMember();
 
-    void removeRemoteMember(ClusterMember remoteMember);
+    void removeRemoteMember(M remoteMember);
 
-    void addRemoteMember(ClusterMember remoteMember);
+    void addRemoteMember(M remoteMember);
 
     TaskService getTaskService();
 }

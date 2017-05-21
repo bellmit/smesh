@@ -7,9 +7,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-class RemoteMembers {
+class RemoteMembers<M extends ClusterMember> {
 
-    private final List<ClusterMember> members = new ArrayList<>();
+    private final List<M> members = new ArrayList<>();
     private final Cluster cluster;
 
     RemoteMembers(Cluster cluster) {
@@ -21,19 +21,19 @@ class RemoteMembers {
         members.clear();
     }
 
-    boolean add(ClusterMember member) {
+    boolean add(M member) {
         verifyRemoteMember(member);
         cluster.getTaskService().verifyExecutingOnThread(TaskThread.CLUSTER);
         return members.add(member);
     }
 
-    boolean remove(ClusterMember member) {
+    boolean remove(M member) {
         verifyRemoteMember(member);
         cluster.getTaskService().verifyExecutingOnThread(TaskThread.CLUSTER);
         return members.remove(member);
     }
 
-    List<ClusterMember> get() {
+    List<M> get() {
         if (cluster.getTaskService().executingOnThread(TaskThread.CLUSTER)) {
             return Collections.unmodifiableList(members);
         }

@@ -20,30 +20,29 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class AbstractCluster implements Cluster {
+public abstract class AbstractCluster<C extends ClusterConfig, M extends ClusterMember> implements Cluster<C,M> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCluster.class);
 
-    private final ClusterConfig config;
+    private final C config;
     private volatile ClusterState state = ClusterState.STOPPED;
     private volatile Instant startTime;
 
-    private final List<ClusterLifecycleListener> lifecycleListeners = new CopyOnWriteArrayList<>();
-    private final List<ClusterEventListener> eventListeners = new CopyOnWriteArrayList<>();
-    private final List<ClusterMembershipListener> membershipListeners = new CopyOnWriteArrayList<>();
+    private final List<ClusterLifecycleListener<C,M>> lifecycleListeners = new CopyOnWriteArrayList<>();
+    private final List<ClusterEventListener<C,M>> eventListeners = new CopyOnWriteArrayList<>();
 
     private final TaskService taskService;
 
-    private final RemoteMembers remoteMembers;
-    private ClusterMember localMember;
+    private final RemoteMembers<M> remoteMembers;
+    private M localMember;
 
     private final AtomicBoolean memberInfoMessageScheduled = new AtomicBoolean(false);
 
 
-    public AbstractCluster(ClusterConfig config) {
+    public AbstractCluster(C config) {
         this.config = Objects.requireNonNull(config, "config is null");
 
-        this.remoteMembers = new RemoteMembers(this);
+        this.remoteMembers = new RemoteMembers<>(this);
         this.taskService = new TaskServiceImpl(this);
 
         if (config.isAutoStartup()) {
@@ -52,7 +51,7 @@ public abstract class AbstractCluster implements Cluster {
     }
 
     @Override
-    public ClusterConfig getConfig() {
+    public C getConfig() {
         return config;
     }
 
@@ -70,17 +69,17 @@ public abstract class AbstractCluster implements Cluster {
             LOGGER.info("Joining smesh cluster...");
 
             state = ClusterState.STARTING;
-            triggerStateChanged(new ClusterLifecycleEvent(this, state));
+            triggerStateChanged(new ClusterLifecycleEvent<>(this, state));
 
             this.localMember = verifyLocalMember(doStart());
 
             startTime = Instant.now();
             state = ClusterState.STARTED;
-            triggerStateChanged(new ClusterLifecycleEvent(this, state));
+            triggerStateChanged(new ClusterLifecycleEvent<>(this, state));
 
             scheduleLogMemberInfo();
 
-            triggerEvent(new ClusterStartedEvent(this, remoteMembers.get(), getLocalMember(), startTime));
+            triggerEvent(new ClusterStartedEvent<>(this, remoteMembers.get(), getLocalMember(), startTime));
 
             stopWatch.stop();
             LOGGER.info("[{}]: Joining smesh cluster took: {}", localMember, stopWatch);
@@ -89,7 +88,7 @@ public abstract class AbstractCluster implements Cluster {
         });
     }
 
-    protected abstract ClusterMember doStart();
+    protected abstract M doStart();
 
     @Override
     public void stop() {
@@ -110,7 +109,7 @@ public abstract class AbstractCluster implements Cluster {
                     LOGGER.info("[{}]: Stopping smesh cluster...", localMember);
 
                     state = ClusterState.STOPPING;
-                    triggerStateChanged(new ClusterLifecycleEvent(this, state));
+                    triggerStateChanged(new ClusterLifecycleEvent<>(this, state));
 
                     taskService.stop();
 
@@ -120,7 +119,7 @@ public abstract class AbstractCluster implements Cluster {
                     localMember = null;
                     startTime = null;
                     state = ClusterState.STOPPED;
-                    triggerStateChanged(new ClusterLifecycleEvent(this, state));
+                    triggerStateChanged(new ClusterLifecycleEvent<>(this, state));
 
                     stopWatch.stop();
                     LOGGER.info("Stopping smesh cluster took: {}", stopWatch);
@@ -137,12 +136,12 @@ public abstract class AbstractCluster implements Cluster {
     protected abstract void doStop();
 
     @Override
-    public List<ClusterMember> getRemoteMembers() {
+    public List<M> getRemoteMembers() {
         return remoteMembers.get();
     }
 
     @Override
-    public ClusterMember getLocalMember() {
+    public M getLocalMember() {
         return localMember;
     }
 
@@ -164,12 +163,12 @@ public abstract class AbstractCluster implements Cluster {
     }
 
     @Override
-    public void registerLifecycleListener(ClusterLifecycleListener listener) {
+    public void registerLifecycleListener(ClusterLifecycleListener<C,M> listener) {
         lifecycleListeners.add(listener);
     }
 
     @Override
-    public void unregisterLifecycleListener(ClusterLifecycleListener listener) {
+    public void unregisterLifecycleListener(ClusterLifecycleListener<C,M> listener) {
         lifecycleListeners.remove(listener);
     }
 
@@ -183,56 +182,56 @@ public abstract class AbstractCluster implements Cluster {
         // TODO: implement
     }
 
-    private void triggerStateChanged(ClusterLifecycleEvent event) {
+    private void triggerStateChanged(ClusterLifecycleEvent<C,M> event) {
         lifecycleListeners.forEach(listener -> listener.stateChanged(event));
     }
 
-    private void triggerRemoteMemberAdded(ClusterMember remoteMember) {
-        membershipListeners.forEach(listener -> listener.remoteMemberAdded(remoteMember));
-    }
+//    private void triggerRemoteMemberAdded(M remoteMember) {
+//        membershipListeners.forEach(listener -> listener.remoteMemberAdded(remoteMember));
+//    }TODO:
 
-    private void triggerEvent(ClusterStartedEvent event) {
+    private void triggerEvent(ClusterStartedEvent<C,M> event) {
         taskService.event(cluster -> eventListeners.forEach(listener -> listener.localClusterStarted(event)));
     }
 
-    private void triggerEvent(RemoteClusterMemberAddedEvent event) {
+    private void triggerEvent(RemoteClusterMemberAddedEvent<C,M> event) {
         taskService.event(cluster -> eventListeners.forEach(listener -> listener.memberAdded(event)));
     }
 
     @Override
-    public void registerEventListener(ClusterEventListener eventListener) {
+    public void registerEventListener(ClusterEventListener<C,M> eventListener) {
         if (!eventListeners.contains(eventListener)) {
             this.eventListeners.add(eventListener);
 
             // Notify late registered listeners when cluster is already started
             if (isState(ClusterState.STARTED)) {
-                eventListener.localClusterStarted(new ClusterStartedEvent(this,
+                eventListener.localClusterStarted(new ClusterStartedEvent<>(this,
                         Collections.unmodifiableList(getRemoteMembers()), getLocalMember(), startTime));
             }
         }
     }
 
     @Override
-    public void unregisterEventListener(ClusterEventListener eventListener) {
+    public void unregisterEventListener(ClusterEventListener<C,M> eventListener) {
         this.eventListeners.remove(eventListener);
     }
 
 
     @Override
-    public void addRemoteMember(ClusterMember remoteMember) {
+    public void addRemoteMember(M remoteMember) {
         taskService.execute(cluster -> {
             doAddRemoteMember(remoteMember);
             return null;
         });
     }
 
-    private void doAddRemoteMember(ClusterMember remoteMember) {
+    private void doAddRemoteMember(M remoteMember) {
         if (remoteMembers.add(remoteMember)) {
             LOGGER.debug("[{}]: added member [{}]", localMember, remoteMember);
 
-            triggerRemoteMemberAdded(remoteMember);
+//            triggerRemoteMemberAdded(remoteMember); TODO:
 
-            triggerEvent(new RemoteClusterMemberAddedEvent(this, remoteMembers.get(), remoteMember));
+            triggerEvent(new RemoteClusterMemberAddedEvent<>(this, remoteMembers.get(), remoteMember));
 
             scheduleLogMemberInfo();
         }
@@ -240,14 +239,14 @@ public abstract class AbstractCluster implements Cluster {
 
 
     @Override
-    public void removeRemoteMember(ClusterMember remoteMember) {
+    public void removeRemoteMember(M remoteMember) {
         taskService.execute(cluster -> {
             doRemoveRemoteMember(remoteMember);
             return null;
         });
     }
 
-    private void doRemoveRemoteMember(ClusterMember remoteMember) {
+    private void doRemoveRemoteMember(M remoteMember) {
         if (remoteMembers.remove(remoteMember)) {
             LOGGER.debug("[{}]: removed remote member [{}]", getLocalMember(), remoteMember);
 
@@ -261,7 +260,7 @@ public abstract class AbstractCluster implements Cluster {
         return taskService;
     }
 
-    private static ClusterMember verifyLocalMember(ClusterMember member) {
+    private M verifyLocalMember(M member) {
         Objects.requireNonNull(member, "member is null");
         if (!member.isLocal()) {
             throw new IllegalArgumentException("Remote member not allowed");

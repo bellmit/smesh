@@ -1,19 +1,21 @@
 package io.smesh.cluster.lifecycle;
 
 import io.smesh.cluster.Cluster;
+import io.smesh.cluster.ClusterConfig;
+import io.smesh.cluster.ClusterMember;
 import io.smesh.cluster.ClusterState;
 
-public final class ClusterLifecycleEvent {
+public final class ClusterLifecycleEvent<C extends ClusterConfig, M extends ClusterMember> {
 
     private final ClusterState state;
-    private final Cluster cluster;
+    private final Cluster<C,M> cluster;
 
-    public ClusterLifecycleEvent(Cluster cluster, ClusterState state) {
+    public ClusterLifecycleEvent(Cluster<C,M> cluster, ClusterState state) {
         this.cluster = cluster;
         this.state = state;
     }
 
-    public Cluster getCluster() {
+    public Cluster<C,M> getCluster() {
         return cluster;
     }
 

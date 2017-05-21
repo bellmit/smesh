@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.UUID;
 
-public class GrpcCluster extends AbstractCluster {
+public class GrpcCluster extends AbstractCluster<GrpcClusterConfig, GrpcClusterMember> {
 
     // Grpc server may be set via constructor directly, in which case we don't touch...
     // when not set then the factory must be set and a grpc server will be create during startup
@@ -14,20 +14,20 @@ public class GrpcCluster extends AbstractCluster {
     private Server grpcServer;
     private GrpcServerFactory grpcServerFactory;
 
-    public GrpcCluster(ClusterConfig config, Server grpcServer) {
+    public GrpcCluster(GrpcClusterConfig config, Server grpcServer) {
         super(config);
         this.grpcServer = grpcServer;
         this.grpcServerExternallyManaged = true;
     }
 
-    public GrpcCluster(ClusterConfig config, GrpcServerFactory grpcServerFactory) {
+    public GrpcCluster(GrpcClusterConfig config, GrpcServerFactory grpcServerFactory) {
         super(config);
         this.grpcServerFactory = grpcServerFactory;
         this.grpcServerExternallyManaged = false;
     }
 
     @Override
-    protected ClusterMember doStart() {
+    protected GrpcClusterMember doStart() {
         if (!grpcServerExternallyManaged) {
             this.grpcServer = grpcServerFactory.create(getConfig());
             try {
@@ -40,7 +40,7 @@ public class GrpcCluster extends AbstractCluster {
         return newLocalClusterMember(getConfig());
     }
 
-    protected ClusterMember newLocalClusterMember(ClusterConfig config) {
+    protected GrpcClusterMember newLocalClusterMember(ClusterConfig config) {
         return new GrpcClusterMember(config.getLocalMemberName(),
                 UUID.randomUUID().toString(),
                 config.getLocalMemberRole(),

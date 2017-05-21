@@ -1,35 +1,38 @@
 package io.smesh.cluster;
 
 
-import java.util.Collections;
+import java.util.Objects;
 
-public abstract class AbstractClusterBuilder<C extends Cluster, B extends AbstractClusterBuilder<C,B>> {
+public abstract class AbstractClusterBuilder<C extends ClusterConfig, M extends ClusterMember, CB extends AbstractClusterConfigBuilder<C,CB>, B extends AbstractClusterBuilder<C,M,CB,B>> {
 
-    protected ClusterConfig config;
+    protected C config;
 
     @SuppressWarnings("unchecked")
-    public B withConfig(ClusterConfig config) {
+    public B withConfig(C config) {
         this.config = config;
         return (B) this;
     }
 
     @SuppressWarnings("unchecked")
-    public B withConfig(ClusterConfigBuilder builder) {
+    public B withConfig(CB builder) {
         this.config = builder.build();
         return (B) this;
     }
 
 
-    public final C build() {
-        initConfig();
+    public final Cluster<C,M> build() {
+        if (config == null) {
+            initConfig();
+        }
+        Objects.requireNonNull("config is required");
         return doBuild();
     }
 
-    private void initConfig() {
-        if (config == null) {
-            config = new ClusterConfig(Collections.emptyMap());
-        }
-    }
+    /**
+     * Invoked if no config instance is available. Concrete implementations should
+     * initialize a default configuration.
+     */
+    protected abstract void initConfig();
 
-    protected abstract C doBuild();
+    protected abstract Cluster<C,M> doBuild();
 }

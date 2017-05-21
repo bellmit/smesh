@@ -9,7 +9,7 @@ public class GrpcClusterTest {
     @Test
     public void shouldStartAndStopCluster() throws InterruptedException {
         final GrpcCluster cluster = newCluster("grpc-cluster-test");
-        final ClusterStateCollector clusterStateCollector = new ClusterStateCollector(cluster);
+        final ClusterStateCollector clusterStateCollector = new ClusterStateCollector<>(cluster);
 
         cluster.start();
         clusterStateCollector.verifyClusterStates(STOPPED, STARTING, STARTED);
@@ -20,7 +20,7 @@ public class GrpcClusterTest {
 
     private GrpcCluster newCluster(final String localMemberName) {
         return new GrpcClusterBuilder()
-                .withConfig(new ClusterConfigBuilder()
+                .withConfig(new GrpcClusterConfigBuilder()
                         .withLocalMemberName(localMemberName))
                 .doBuild();
     }

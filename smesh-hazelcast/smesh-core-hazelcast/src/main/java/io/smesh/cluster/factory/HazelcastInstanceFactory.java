@@ -1,6 +1,7 @@
-package io.smesh.cluster;
+package io.smesh.cluster.factory;
 
 import com.hazelcast.core.HazelcastInstance;
+import io.smesh.cluster.ClusterConfig;
 
 public interface HazelcastInstanceFactory {
 

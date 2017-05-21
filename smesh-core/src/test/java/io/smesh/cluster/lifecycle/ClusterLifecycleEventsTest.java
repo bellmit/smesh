@@ -1,8 +1,6 @@
 package io.smesh.cluster.lifecycle;
 
-import io.smesh.cluster.Cluster;
-import io.smesh.cluster.ClusterState;
-import io.smesh.cluster.MemoryClusterBuilder;
+import io.smesh.cluster.*;
 import io.smesh.cluster.lifecycle.ClusterLifecycleEventExpectation;
 import org.junit.Test;
 
@@ -13,9 +11,9 @@ public class ClusterLifecycleEventsTest {
 //TODO: event tests + taskservice tests
     @Test
     public void triggersStartAndStopEvents() throws InterruptedException {
-        Cluster cluster = new MemoryClusterBuilder().build();
+        Cluster<ClusterConfig,ClusterMember> cluster = new MemoryClusterBuilder().build();
 
-        ClusterLifecycleEventExpectation expectation = new ClusterLifecycleEventExpectation(2);
+        ClusterLifecycleEventExpectation<ClusterConfig,ClusterMember> expectation = new ClusterLifecycleEventExpectation<>(2);
         cluster.registerLifecycleListener(expectation);
         cluster.start();
         expectation.await();
@@ -37,9 +35,9 @@ public class ClusterLifecycleEventsTest {
 
     @Test
     public void shouldNoLongerReceiveEventAfterUnregister() throws InterruptedException {
-        Cluster cluster = new MemoryClusterBuilder().build();
+        Cluster<ClusterConfig,ClusterMember> cluster = new MemoryClusterBuilder().build();
 
-        ClusterLifecycleEventExpectation expectation = new ClusterLifecycleEventExpectation(2);
+        ClusterLifecycleEventExpectation<ClusterConfig,ClusterMember> expectation = new ClusterLifecycleEventExpectation<>(2);
         cluster.registerLifecycleListener(expectation);
         cluster.start();
         expectation.await();

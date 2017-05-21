@@ -1,6 +1,9 @@
 package io.smesh.cluster.lifecycle;
 
-public interface ClusterLifecycleListener {
+import io.smesh.cluster.ClusterConfig;
+import io.smesh.cluster.ClusterMember;
 
-    void stateChanged(ClusterLifecycleEvent event);
+public interface ClusterLifecycleListener<C extends ClusterConfig, M extends ClusterMember> {
+
+    void stateChanged(ClusterLifecycleEvent<C,M> event);
 }

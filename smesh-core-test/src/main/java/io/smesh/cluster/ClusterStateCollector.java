@@ -4,13 +4,13 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 
-public class ClusterStateCollector {
+public class ClusterStateCollector<C extends ClusterConfig, M extends ClusterMember> {
 
-    private final Cluster cluster;
+    private final Cluster<C,M> cluster;
     private final ClusterState initialClusterState;
     private final Collection<ClusterState> collectedClusterStates = new ArrayList<>();
 
-    public ClusterStateCollector(final Cluster cluster) {
+    public ClusterStateCollector(final Cluster<C,M> cluster) {
         this.cluster = Objects.requireNonNull(cluster);
         initialClusterState = cluster.getState();
         cluster.registerLifecycleListener(event -> collectedClusterStates.add(event.getState()));
@@ -30,7 +30,7 @@ public class ClusterStateCollector {
         }
     }
 
-    public Cluster getCluster() {
+    public Cluster<C,M> getCluster() {
         return cluster;
     }
 

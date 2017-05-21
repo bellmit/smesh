@@ -1,8 +1,12 @@
 package io.smesh.cluster;
 
 import com.hazelcast.core.HazelcastInstance;
+import io.smesh.cluster.ClusterMember.Role;
+import io.smesh.cluster.factory.client.HazelcastClientInstanceFactoryBuilder;
+import io.smesh.cluster.factory.HazelcastInstanceFactory;
+import io.smesh.cluster.factory.server.HazelcastInstanceFactoryBuilder;
 
-public class HazelcastClusterBuilder extends AbstractClusterBuilder<HazelcastCluster, HazelcastClusterBuilder> {
+public class HazelcastClusterBuilder extends AbstractClusterBuilder<HazelcastClusterConfig, HazelcastClusterMember, HazelcastClusterConfigBuilder, HazelcastClusterBuilder> {
 
     private HazelcastInstance hazelcastInstance;
     private HazelcastInstanceFactory hazelcastInstanceFactory;
@@ -23,6 +27,10 @@ public class HazelcastClusterBuilder extends AbstractClusterBuilder<HazelcastClu
         return this;
     }
 
+    public HazelcastClusterBuilder withHazelcastInstanceFactory(HazelcastInstanceFactoryBuilder hazelcastInstanceFactoryBuilder) {
+        return withHazelcastInstanceFactory(hazelcastInstanceFactoryBuilder.build());
+    }
+
     @Override
     protected HazelcastCluster doBuild() {
         initHazelcastInstanceFactory();
@@ -34,7 +42,18 @@ public class HazelcastClusterBuilder extends AbstractClusterBuilder<HazelcastClu
 
     protected void initHazelcastInstanceFactory() {
         if (hazelcastInstance == null && hazelcastInstanceFactory == null) {
-            this.hazelcastInstanceFactory = new HazelcastInstanceFactoryImpl();
+            if (config.getLocalMemberRole() == Role.SERVER) {
+                this.hazelcastInstanceFactory = new HazelcastInstanceFactoryBuilder().build();
+            } else {
+                this.hazelcastInstanceFactory = new HazelcastClientInstanceFactoryBuilder().build();
+            }
+        }
+    }
+
+    @Override
+    protected void initConfig() {
+        if (config == null) {
+            withConfig(new HazelcastClusterConfigBuilder());
         }
     }
 }

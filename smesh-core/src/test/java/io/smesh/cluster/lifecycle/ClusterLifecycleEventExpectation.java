@@ -1,5 +1,7 @@
 package io.smesh.cluster.lifecycle;
 
+import io.smesh.cluster.ClusterConfig;
+import io.smesh.cluster.ClusterMember;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,10 +13,10 @@ import java.util.concurrent.TimeUnit;
 import static io.smesh.cluster.task.TaskService.TaskThread.CLUSTER;
 import static org.junit.Assert.fail;
 
-public class ClusterLifecycleEventExpectation implements ClusterLifecycleListener  {
+public class ClusterLifecycleEventExpectation<C extends ClusterConfig, M extends ClusterMember> implements ClusterLifecycleListener<C,M>  {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterLifecycleEventExpectation.class);
 
-    private final List<ClusterLifecycleEvent> events = new ArrayList<>();
+    private final List<ClusterLifecycleEvent<C,M>> events = new ArrayList<>();
     private int invocations;
     private CountDownLatch latch;
 
@@ -29,7 +31,7 @@ public class ClusterLifecycleEventExpectation implements ClusterLifecycleListene
     }
 
     @Override
-    public void stateChanged(ClusterLifecycleEvent event) {
+    public void stateChanged(ClusterLifecycleEvent<C,M> event) {
         LOGGER.info("Received lifecycle event: {}", event.getState());
         event.getCluster().getTaskService().verifyExecutingOnThread(CLUSTER);
         events.add(event);
@@ -41,7 +43,7 @@ public class ClusterLifecycleEventExpectation implements ClusterLifecycleListene
         return invocations;
     }
 
-    public List<ClusterLifecycleEvent> getEvents() {
+    public List<ClusterLifecycleEvent<C,M>> getEvents() {
         return events;
     }
 

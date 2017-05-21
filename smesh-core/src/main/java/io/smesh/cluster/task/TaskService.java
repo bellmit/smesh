@@ -1,6 +1,7 @@
 package io.smesh.cluster.task;
 
-import io.smesh.cluster.ClusterAware;
+import io.smesh.cluster.ClusterConfig;
+import io.smesh.cluster.ClusterMember;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  *     <li>SCHEDULER: This pool uses two threads and is used for scheduling various tasks.</li>
  * </ul>
  */
-public interface TaskService {
+public interface TaskService<C extends ClusterConfig, M extends ClusterMember> {
 
     enum TaskThread {
         CLUSTER,
@@ -32,15 +33,15 @@ public interface TaskService {
 
     void verifyExecutingOnThread(TaskThread thread);
 
-    void scheduleWithFixedDelay(ScheduledTask task, long initialDelay, long delay, TimeUnit timeUnit);
+    void scheduleWithFixedDelay(ScheduledTask<C,M> task, long initialDelay, long delay, TimeUnit timeUnit);
 
-    void schedule(ScheduledTask task, long delay, TimeUnit timeUnit);
+    void schedule(ScheduledTask<C,M> task, long delay, TimeUnit timeUnit);
 
-    <R> TaskCall<R> execute(ClusterTask<R> task);
+    <R> TaskCall<R> execute(ClusterTask<C,M,R> task);
 
-    void event(EventTask task);
+    void event(EventTask<C,M> task);
 
-    <R> R executeAwait(ClusterTask<R> task);
+    <R> R executeAwait(ClusterTask<C,M,R> task);
 
     abstract class TaskCall<R> implements Callable<R> {
 

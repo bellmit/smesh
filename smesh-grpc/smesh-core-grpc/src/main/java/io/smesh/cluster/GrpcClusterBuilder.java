@@ -2,7 +2,7 @@ package io.smesh.cluster;
 
 import io.grpc.Server;
 
-public class GrpcClusterBuilder extends AbstractClusterBuilder<GrpcCluster, GrpcClusterBuilder> {
+public class GrpcClusterBuilder extends AbstractClusterBuilder<GrpcClusterConfig, GrpcClusterMember, GrpcClusterConfigBuilder, GrpcClusterBuilder> {
 
     private GrpcServerFactory grpcServerFactory;
     private Server grpcServer;
@@ -21,6 +21,11 @@ public class GrpcClusterBuilder extends AbstractClusterBuilder<GrpcCluster, Grpc
         }
         this.grpcServerFactory = grpcServerFactory;
         return this;
+    }
+
+    @Override
+    protected void initConfig() {
+        withConfig(new GrpcClusterConfigBuilder());
     }
 
     @Override
