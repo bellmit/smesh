@@ -1,0 +1,10 @@
+= TODOs
+
+== Core Functionality
+
+TODO
+
+
+== Nice to Haves
+
+- Dynamic "docker-like" default local-member name generation e.g. <adjective>_<noun/name>
